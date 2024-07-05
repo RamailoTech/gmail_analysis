@@ -31,11 +31,11 @@ In the above link `Drive Api` is enabled but in our case we enable `Gmail Api`
 
 ### Generating google api token
 ```
-python -m src.token_generator'
+python -m src.token_generator
 ```
 ### Exporting bulk email
 ```
-python -m src.export_bulk_email'
+python -m src.export_bulk_email
 ```
 It will ask for a date range between which you want the mail to be fetched.
 The `start_date` is the date from which the code should start looking from.
