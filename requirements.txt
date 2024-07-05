@@ -1,0 +1,14 @@
+openpyxl
+pytz
+pandas
+python-dotenv
+google-api-python-client
+google-auth
+google-auth-oauthlib
+mimetypes
+pathlib
+email
+base64
+csv
+re
+time
