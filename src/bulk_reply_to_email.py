@@ -9,7 +9,7 @@ from google.oauth2.credentials import Credentials
 import mimetypes
 import os
 from src.path_setup import input_dir, output_dir
-from src.template.email_template import get_email_body
+from src.template.email_template import get_email_body, get_email_subject
 import csv
 
 
@@ -26,6 +26,8 @@ def mail_block_team(file_attachments, body, subject, receiver_email, message_id)
         mimeMessage = MIMEMultipart()
         mimeMessage['to'] = receiver_email
         mimeMessage['subject'] = subject
+        mimeMessage['In-Reply-To'] = message_id
+        mimeMessage['References'] = message_id
         mimeMessage.attach(MIMEText(body, 'html'))
         
         # Attach files
@@ -60,25 +62,28 @@ def mail_block_team(file_attachments, body, subject, receiver_email, message_id)
 def send_replies_from_csv(csv_file_path):
     file_attachments = [] 
     body = get_email_body()
-    subject = ""
+    subject = get_email_subject()
 
     sent_mail_log = []
     
     with open(csv_file_path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            message_id = row['ID']
-            receiver_email = row['Sender Email']
-            is_mail_sent = mail_block_team(file_attachments, body=body, subject=subject, receiver_email=receiver_email, message_id=message_id)
-            sent_mail_log.append({
-                'Sender Email': receiver_email,
-                'ID': message_id,
-                'sent': 1 if is_mail_sent else 0
-            })
-            if is_mail_sent:
-                print(f"Reply sent to {receiver_email} for message ID {message_id}")
+            if row['is_sent'] =='0':
+                message_id = row['ID']
+                receiver_email = row['Sender Email']
+                is_mail_sent = mail_block_team(file_attachments, body=body, subject=subject, receiver_email=receiver_email, message_id=message_id)
+                sent_mail_log.append({
+                    'Sender Email': receiver_email,
+                    'ID': message_id,
+                    'sent': 1 if is_mail_sent else 0
+                })
+                if is_mail_sent:
+                    print(f"Reply sent to {receiver_email} for message ID {message_id}")
+                else:
+                    print(f"Failed to send reply to {receiver_email} for message ID {message_id}")
             else:
-                print(f"Failed to send reply to {receiver_email} for message ID {message_id}")
+                print("Skipping the email as you sent the email")
 
     # Write sent mail log to CSV
     sent_mail_csv_path = os.path.join(output_dir, 'sent/sent_mail.csv')

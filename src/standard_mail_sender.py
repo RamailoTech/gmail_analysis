@@ -10,7 +10,7 @@ from google.oauth2.credentials import Credentials
 import mimetypes
 import os
 from src.path_setup import input_dir, output_dir
-from src.template.email_template import get_email_body
+from src.template.email_template import get_email_body, get_email_subject
 
 def mail_block_team(file_attachments, body, subject, receiver_email):
     '''
@@ -50,33 +50,42 @@ def mail_block_team(file_attachments, body, subject, receiver_email):
         print(f"Error occurred while sending email to {receiver_email}: {ex}")
         return False
 
-def send_emails_from_csv(input_csv, output_csv):
-    file_attachments = []  
+def send_standard_email_from_csv(csv_file_path):
+    file_attachments = [] 
     body = get_email_body()
-    subject = "Test email"
+    subject = get_email_subject()
 
-    emails = set()
-    with open(input_csv, mode='r') as infile:
-        reader = csv.DictReader(infile)
+    sent_mail_log = []
+    
+    with open(csv_file_path, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
         for row in reader:
-            emails.add(row['Sender Email'])
+            if row['is_sent'] =='0':
+                message_id = row['ID']
+                receiver_email = row['Sender Email']
+                is_mail_sent = mail_block_team(file_attachments, body=body, subject=subject, receiver_email=receiver_email)
+                sent_mail_log.append({
+                    'Sender Email': receiver_email,
+                    'ID': message_id,
+                    'sent': 1 if is_mail_sent else 0
+                })
+                if is_mail_sent:
+                    print(f"Reply sent to {receiver_email} for message ID {message_id}")
+                else:
+                    print(f"Failed to send reply to {receiver_email} for message ID {message_id}")
+            else:
+                print("Skipping the email as you sent the email")
 
-    results = []
-
-    for email in emails:
-        is_mail_sent = mail_block_team(file_attachments, body=body, subject=subject, receiver_email=email)
-        results.append({'Email': email, 'Sent': 1 if is_mail_sent else 0})
-        if is_mail_sent:
-            print(f"Email sent to {email}")
-        else:
-            print(f"Failed to send email to {email}")
-
-    with open(output_csv, mode='w', newline='') as outfile:
-        writer = csv.DictWriter(outfile, fieldnames=['Email', 'Sent'])
+    # Write sent mail log to CSV
+    sent_mail_csv_path = os.path.join(output_dir, 'sent/sent_mail.csv')
+    with open(sent_mail_csv_path, 'w', newline='') as csvfile:
+        fieldnames = ['Sender Email', 'ID', 'sent']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(results)
+        for log in sent_mail_log:
+            writer.writerow(log)
+
 
 if __name__ == '__main__':
-    input_csv = os.path.join(output_dir, 'manish@ramailo.tech/2024-07-03_to_2024-07-04.csv')
-    output_csv = os.path.join(output_dir, 'manish@ramailo.tech/standard_mail_sent.csv')
-    send_emails_from_csv(input_csv, output_csv)
+    csv_file_path = os.path.join(output_dir, 'emails/exported_data.csv')
+    send_standard_email_from_csv(csv_file_path)
