@@ -69,7 +69,7 @@ def send_replies_from_csv(csv_file_path):
     with open(csv_file_path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            if row['is_sent'] =='0':
+            if row['Is Sent'] =='0':
                 message_id = row['ID']
                 receiver_email = row['Sender Email']
                 is_mail_sent = mail_block_team(file_attachments, body=body, subject=subject, receiver_email=receiver_email, message_id=message_id)
