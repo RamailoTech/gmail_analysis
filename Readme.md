@@ -3,12 +3,29 @@ This project helps to export send bulk email from a google account
 
 ## Setup
 
+### Create a virtual env
+Creating a virtual env is a good pratice to manage dependencies
+```
+python3 -m venv venv
+```
+To activate the venv
+```
+source venv/bin/activate
+```
+
 ### Install the required packages
 ```
 pip install -r requirements.txt
 ```
+
 ### Tokens
 We need to get the google o auth credentials and keep it under `data/input/credentials.json` 
+
+To acquire the google o auth credentials you can follow the steps that are mentioned on this link.
+
+https://medium.com/automationmaster/getting-google-oauth-access-token-using-google-apis-18b2ba11a11a
+
+In the above link `Drive Api` is enabled but in our case we enable `Gmail Api`
 
 ## Running the application
 
