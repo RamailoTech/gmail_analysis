@@ -31,7 +31,7 @@ def export_emails(after=None, before=None):
         csv_filename = "exported_data.csv"
         csv_file = os.path.join(email_output_dir, csv_filename)
         
-        with open(csv_file, mode='w', newline='') as file:
+        with open(csv_file, mode='w', newline='',encoding='utf-8') as file:
             writer = csv.writer(file)
             writer.writerow(["ID", "Sender Name", "Sender Email", "Subject", "Timestamp", "Is Sent", "Content"])
 
